@@ -1,69 +1,79 @@
+// server.js
 import express from 'express';
 import dotenv from 'dotenv';
 import fetch from 'node-fetch';
+import OpenAI from 'openai';
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 
-app.post('/update-track-report', async (req, res) => {
-  const message = req.body.body || 'No track update provided.';
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-  console.log(`📩 Incoming track report: ${message}`);
+app.post('/update-track-report', async (req, res) => {
+  const message = req.body.message || 'No message received';
+  console.log('📩 Incoming track report:', message);
 
   try {
-    const result = await updateShopify(message);
+    // ✍️ Rewrite the track report using GPT
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are an energetic motocross announcer. Rewrite this track report in a short, bold, and hype tone for a daily update section on a motocross website. Make it sound rad but readable.'
+        },
+        {
+          role: 'user',
+          content: message
+        }
+      ]
+    });
+
+    const rewritten = completion.choices[0].message.content.trim();
+    console.log('✨ Rewritten report:', rewritten);
+
+    const metafieldPayload = {
+      query: `
+        mutation metafieldsSet($metafields: [MetafieldsSetInput!]!) {
+          metafieldsSet(metafields: $metafields) {
+            metafields { id key value }
+            userErrors { field message }
+          }
+        }
+      `,
+      variables: {
+        metafields: [
+          {
+            key: 'track_conditions',
+            namespace: 'custom',
+            ownerId: process.env.SHOPIFY_PAGE_ID,
+            type: 'single_line_text_field',
+            value: rewritten
+          }
+        ]
+      }
+    };
+
+    const response = await fetch(`https://${process.env.SHOPIFY_SHOP}/admin/api/2024-01/graphql.json`, {
+      method: 'POST',
+      headers: {
+        'X-Shopify-Access-Token': process.env.SHOPIFY_TOKEN,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(metafieldPayload)
+    });
+
+    const result = await response.json();
     console.log('🔧 Shopify response:', JSON.stringify(result, null, 2));
-    res.status(200).send('Track report updated in metafield');
-  } catch (err) {
-    console.error('❌ Shopify update failed:', err);
-    res.status(500).send('Error updating metafield');
+
+    res.status(200).send('Track report updated successfully');
+  } catch (error) {
+    console.error('❌ Error updating Shopify:', error);
+    res.status(500).send('Something went wrong');
   }
 });
 
-async function updateShopify(message) {
-  const shop = process.env.SHOPIFY_SHOP;
-  const token = process.env.SHOPIFY_TOKEN;
-  const ownerId = process.env.SHOPIFY_PAGE_ID; // Actually the Shop GID now!
-
-  const mutation = `
-    mutation metafieldsSet {
-      metafieldsSet(metafields: [
-        {
-          namespace: "custom",
-          key: "track_conditions",
-          type: "multi_line_text_field",
-          value: ${JSON.stringify(message)},
-          ownerId: "${ownerId}"
-        }
-      ]) {
-        metafields {
-          id
-          key
-          value
-        }
-        userErrors {
-          field
-          message
-        }
-      }
-    }
-  `;
-
-  const response = await fetch(`https://${shop}/admin/api/2024-01/graphql.json`, {
-    method: 'POST',
-    headers: {
-      'X-Shopify-Access-Token': token,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ query: mutation }),
-  });
-
-  return await response.json();
-}
-
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🔥 Listening on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`🔥 Listening on port ${PORT}`));
