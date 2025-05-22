@@ -28,15 +28,17 @@ async function updateShopify(message) {
   const pageId = process.env.SHOPIFY_PAGE_ID;
 
   const mutation = `
-    mutation metafieldUpsert {
-      metafieldUpsert(input: {
-        namespace: "custom",
-        key: "track_conditions",
-        value: ${JSON.stringify(message)},
-        type: "multi_line_text_field",
-        ownerId: "${pageId}"
-      }) {
-        metafield {
+    mutation metafieldsSet {
+      metafieldsSet(metafields: [
+        {
+          namespace: "custom",
+          key: "track_conditions",
+          type: "multi_line_text_field",
+          value: ${JSON.stringify(message)},
+          ownerId: "${pageId}"
+        }
+      ]) {
+        metafields {
           id
           key
           value
