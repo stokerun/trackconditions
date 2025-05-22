@@ -59,7 +59,7 @@ app.post('/update-track-report', async (req, res) => {
             key: 'track_conditions',
             namespace: 'custom',
             ownerId: process.env.SHOPIFY_PAGE_ID,
-            type: 'single_line_text_field',
+            type: 'multi_line_text_field',
             value: rewritten
           }
         ]
