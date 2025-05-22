@@ -16,13 +16,23 @@ app.post('/update-track-report', async (req, res) => {
   console.log('📩 Incoming track report:', message);
 
   try {
-    // ✍️ Rewrite the track report using GPT
+    const today = new Date().toLocaleDateString('en-US', {
+      weekday: 'long'
+    });
+
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
         {
           role: 'system',
-          content: 'You are an energetic motocross announcer. Rewrite this track report in a short, bold, and hype tone for a daily update section on a motocross website. Make it sound rad but readable.'
+          content: `You are a track conditions announcer for an action sports park. Rewrite the following rider-submitted track report into a concise and informative daily update. Use a consistent broadcast format with:
+
+- A short, friendly intro line like: "Here’s your most recent track update for [day]. Look forward to seeing you all soon."
+- Bullet points for all condition details
+- Clear, factual language
+- Optional emoji use is allowed (🌧️, ☀️, 🛞, 🚧), but keep it tasteful
+- No hype, no slang, no jokes
+- Keep total output under 80 words`
         },
         {
           role: 'user',
