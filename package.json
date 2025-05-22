@@ -1,10 +1,16 @@
 {
   "name": "trackconditions",
   "version": "1.0.0",
+  "description": "Webhook app for GHL to Shopify",
   "type": "module",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },
-  ...
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "node-fetch": "^3.3.2"
+  },
+  "license": "MIT"
 }
-
