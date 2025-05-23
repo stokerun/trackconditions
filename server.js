@@ -114,6 +114,10 @@ Avoid hype or slang. Keep it clean, factual, and brief. You may use emojis where
     res.status(500).send('Something went wrong');
   }
 });
+app.get('/ping', (req, res) => {
+  res.send('OK');
+});
+
 
 app.listen(PORT, () => {
   console.log(`🔥 Listening on port ${PORT}`);
