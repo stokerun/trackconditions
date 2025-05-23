@@ -39,7 +39,7 @@ const getFormattedTimestamp = () => {
   });
 };
 
-app.post('/rewrite-track-report', async (req, res) => {
+const handleTrackReport = async (req, res) => {
   const message = req.body.message;
   console.log('📩 Incoming track report:', message);
 
@@ -113,11 +113,18 @@ Avoid hype or slang. Keep it clean, factual, and brief. You may use emojis where
     console.error('❌ Error:', err);
     res.status(500).send('Something went wrong');
   }
-});
+};
+
+// Primary route for GHL
+app.post('/rewrite-track-report', handleTrackReport);
+
+// Alias for legacy GHL webhook link
+app.post('/update-track-report', handleTrackReport);
+
+// Keep-alive ping route
 app.get('/ping', (req, res) => {
   res.send('OK');
 });
-
 
 app.listen(PORT, () => {
   console.log(`🔥 Listening on port ${PORT}`);
