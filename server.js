@@ -41,6 +41,13 @@ const getFormattedTimestamp = () => {
 
 app.post('/update-track-report', async (req, res) => {
   const message = req.body.message;
+
+  // ⛔ Prevent updates without a meaningful message
+  if (!message || typeof message !== 'string' || message.trim().length < 10) {
+    console.log('⚠️ Skipping update: message missing or too short.');
+    return res.status(204).send('No update made — message missing or invalid.');
+  }
+
   console.log('📩 Incoming track report:', message);
 
   try {
@@ -53,7 +60,7 @@ app.post('/update-track-report', async (req, res) => {
 
 Use this format:
 
-Here’s your most recent track update for [day of week]. Look forward to seeing you all soon.
+Here's your most recent track update for [day of week]. Look forward to seeing you all soon.
 
 - Point one
 - Point two
@@ -107,7 +114,6 @@ Avoid hype or slang. Keep it clean, factual, and brief. You may use emojis where
     `);
 
     console.log('🔧 Shopify response:', JSON.stringify(shopifyResponse, null, 2));
-
     res.send('Track report rewritten and updated in Shopify');
   } catch (err) {
     console.error('❌ Error:', err);
@@ -115,8 +121,10 @@ Avoid hype or slang. Keep it clean, factual, and brief. You may use emojis where
   }
 });
 
+// ✅ Safe, cron-friendly ping route with HTTP 200
 app.get('/ping', (req, res) => {
-  res.send('OK');
+  console.log(`📡 Ping received at ${new Date().toISOString()}`);
+  res.status(200).send('✅ Ping OK');
 });
 
 app.listen(PORT, () => {
