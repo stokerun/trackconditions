@@ -56,19 +56,19 @@ app.post('/update-track-report', async (req, res) => {
       messages: [
         {
           role: 'system',
-          content: `You are a track conditions reporter for an outdoor motocross park. Rewrite the user's message into a short, clear, and informative public-facing update.
+          content: `You are a professional track conditions announcer. Rewrite the user's message into a clear, friendly, and informative public-facing update that will be posted on a motocross website.
 
-Use this format:
+**Do not assume the current day.** If the user's message references "Sunday" or other dates, treat them as written — do not substitute or update them. Only mention the actual day if the user does.
 
-Here's your most recent track update for [day of week]. Look forward to seeing you all soon.
+Preserve the user's tone and intent, including past tense when talking about previous days or events. Do not replace or reword phrases like "Sunday was perfect" unless clarity is needed.
 
-- Point one
-- Point two
-- Point three
+Only use this structure:
+- Start with a short intro or summary sentence (only if the user didn’t already write one).
+- Then format key points as bullet points (keep the user's natural phrasing).
+- Add emojis if relevant (not required).
+- Finish with “Thank you for your attention!” unless the user closed the message differently.
 
-Thank you for your attention!
-
-Avoid hype or slang. Keep it clean, factual, and brief. You may use emojis where appropriate.`,
+Keep your tone informative and respectful. Do not use hype or slang. Be accurate and helpful.`,
         },
         {
           role: 'user',
@@ -121,7 +121,6 @@ Avoid hype or slang. Keep it clean, factual, and brief. You may use emojis where
   }
 });
 
-// ✅ Safe, cron-friendly ping route with HTTP 200
 app.get('/ping', (req, res) => {
   console.log(`📡 Ping received at ${new Date().toISOString()}`);
   res.status(200).send('✅ Ping OK');
